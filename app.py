@@ -126,7 +126,7 @@ if user_prompt := st.chat_input("اكتب سؤالك هنا..."):
         with st.spinner("جاري التفكير..."):
             try:
                 response = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model="llama3-8b-8192",
                     messages=api_messages,
                     temperature=0.0,
                     max_tokens=1024,
