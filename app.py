@@ -17,14 +17,13 @@ st.markdown("مرحباً بك! أنا هنا للإجابة على استفسا
 # -----------------------------------------------------------------------------
 # 2. Secure API Key Setup (Streamlit Secrets)
 # -----------------------------------------------------------------------------
-# Reads the key securely from Streamlit Cloud Secrets or local .streamlit/secrets.toml
 try:
     API_KEY = st.secrets["GROQ_API_KEY"]
 except (KeyError, FileNotFoundError):
     st.error("⚠️ لم يتم العثور على مفتاح Groq API! يرجى إضافة GROQ_API_KEY في إعدادات Secrets.")
     st.stop()
 
-# Initialize the Groq client with the retrieved key
+# Initialize the Groq client
 client = Groq(api_key=API_KEY)
 
 # -----------------------------------------------------------------------------
@@ -110,7 +109,6 @@ SYSTEM_PROMPT = """
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display previous conversation messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -119,27 +117,23 @@ for message in st.session_state.messages:
 # 5. User Input & Groq API Execution
 # -----------------------------------------------------------------------------
 if user_prompt := st.chat_input("اكتب سؤالك هنا..."):
-    # Display user's question
     st.chat_message("user").markdown(user_prompt)
     st.session_state.messages.append({"role": "user", "content": user_prompt})
 
-    # Prepare message payload with System Prompt + History
     api_messages = [{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages
 
-    # Call Groq API
     with st.chat_message("assistant"):
         with st.spinner("جاري التفكير..."):
             try:
                 response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model="llama-3.1-8b-instant",
                     messages=api_messages,
-                    temperature=0.3,
+                    temperature=0.0,
                     max_tokens=1024,
                 )
                 bot_reply = response.choices[0].message.content
                 st.markdown(bot_reply)
                 
-                # Save assistant response to session state
                 st.session_state.messages.append({"role": "assistant", "content": bot_reply})
             except Exception as e:
                 st.error(f"حدث خطأ أثناء التواصل مع API: {str(e)}")
